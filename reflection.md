@@ -64,13 +64,9 @@ classDiagram
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers task due times (for chronological ordering), priorities (High/Medium/Low to rank urgency), pet assignments (to group and separate tasks per pet), and recurrence patterns (to handle daily/weekly/monthly auto-creation). It prioritizes fixed-time tasks first (placed at exact due_time), then slots flexible tasks into remaining windows sorted by priority and estimated time. I decided these constraints mattered most because they align with real pet care needs: time-sensitive routines (feedings, walks), urgency (medications over playtime), pet-specific care, and recurring maintenance without manual re-entry.
 
 **b. Tradeoffs**
-
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
 
 I chose a lightweight conflict model that checks exact time overlaps in scheduled timeslots, rather than a full interval graph with partial overlap and flexible granular rescheduling. This keeps the system simple to reason about and perform in a small CLI app, while still catching the most common collision cases (same-hour tasks for the same or multiple pets).
 
@@ -101,7 +97,7 @@ I chose a lightweight conflict model that checks exact time overlaps in schedule
 
 **b. Confidence**
 
-- 5/5: Base functionality is solid with current tests, but more edge cases could be added (monthly end-of-month behavior, multi-day scheduling, user persistence).
+- 4/5: Base functionality is solid with current tests, but more edge cases could be added (monthly end-of-month behavior, multi-day scheduling, user persistence).
 
 ---
 
@@ -120,34 +116,3 @@ I chose a lightweight conflict model that checks exact time overlaps in schedule
 **c. Key takeaway**
 
 - Being the lead architect means setting clear goals, reviewing AI outputs critically, and choosing maintainability over cleverness. AI accelerates implementation, but validation with tests and intentional design decisions still matters.
-
-
----
-
-## 4. Testing and Verification
-
-**a. What you tested**
-
-- What behaviors did you test?
-- Why were these tests important?
-
-**b. Confidence**
-
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
-
----
-
-## 5. Reflection
-
-**a. What went well**
-
-- What part of this project are you most satisfied with?
-
-**b. What you would improve**
-
-- If you had another iteration, what would you improve or redesign?
-
-**c. Key takeaway**
-
-- What is one important thing you learned about designing systems or working with AI on this project?
