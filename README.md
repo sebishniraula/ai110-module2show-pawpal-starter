@@ -59,3 +59,21 @@ The latest version includes:
 - `Owner.mark_task_complete` as a UI-friendly helper to mark and reload repeating tasks
 - Enhanced conflict detection with `Scheduler.detect_conflicts` warning about overlapping times
 
+## Testing PawPal+
+
+To run the test suite:
+
+```bash
+python -m pytest
+```
+
+What the tests cover:
+
+- Sorting correctness for tasks by due time
+- Recurrence behavior: completing a daily task schedules the next date
+- Conflict detection works when tasks overlap in scheduled time
+- Basic task management (add task to pet, duplicate prevention)
+
+Confidence Level: ⭐⭐⭐⭐⭐ (5/5) based on 7 passing tests and focused edge case coverage.
+
+
