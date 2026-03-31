@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime, time, timedelta
 from enum import IntEnum
 from typing import List, Optional, Dict, Any, Tuple
@@ -97,6 +97,41 @@ class Task:
 
         return None
 
+    def mark_complete(self, completed_date: date = date.today()) -> Optional["Task"]:
+        """Mark this task complete and create next recurrence if applicable."""
+        if self.completed:
+            return None
+
+        next_date = None
+        if self.recurrence:
+            if self.recurrence == "daily":
+                next_date = completed_date + timedelta(days=1)
+            elif self.recurrence == "weekly":
+                next_date = completed_date + timedelta(days=7)
+            elif self.recurrence == "monthly":
+                next_month = completed_date.month + 1
+                next_year = completed_date.year
+                if next_month > 12:
+                    next_month = 1
+                    next_year += 1
+                try:
+                    next_date = date(year=next_year, month=next_month, day=completed_date.day)
+                except ValueError:
+                    month_start = date(year=next_year, month=next_month, day=1)
+                    next_date = month_start - timedelta(days=1)
+
+        self.completed = True
+
+        if next_date:
+            return replace(
+                self,
+                due_date=next_date,
+                completed=False,
+                created_at=datetime.now(),
+            )
+
+        return None
+
 
 @dataclass
 class Pet:
@@ -146,6 +181,26 @@ class Owner:
             raise ValueError(f"Pet '{task.pet_name}' not found")
         pet.add_task(task)
 
+    def mark_task_complete(
+        self,
+        pet_name: str,
+        task_title: str,
+        completed_date: date = date.today(),
+    ) -> Optional[Task]:
+        """Mark a specified task complete and return the next recurring task (if created)."""
+        pet = self.get_pet(pet_name)
+        if not pet:
+            raise ValueError(f"Pet '{pet_name}' not found")
+
+        for task in pet.tasks:
+            if task.title == task_title and not task.completed:
+                next_task = task.mark_complete(completed_date=completed_date)
+                if next_task:
+                    pet.add_task(next_task)
+                return next_task
+
+        raise ValueError(f"Task '{task_title}' not found for pet '{pet_name}'")
+
     def all_tasks_for_date(self, target_date: date) -> List[Task]:
         tasks: List[Task] = []
         for pet in self.pets:
@@ -186,6 +241,30 @@ class Scheduler:
                 conflicts.append((first, second))
 
         return conflicts
+
+    def sort_tasks_by_time(self, tasks: List[Task]) -> List[Task]:
+        """Sort tasks by due_time, with undated tasks last."""
+        return sorted(
+            tasks,
+            key=lambda t: (
+                t.due_time.hour * 60 + t.due_time.minute if t.due_time else 24 * 60,
+                t.priority,
+            ),
+        )
+
+    def filter_tasks(
+        self,
+        tasks: List[Task],
+        pet_name: Optional[str] = None,
+        completed: Optional[bool] = None,
+    ) -> List[Task]:
+        """Filter tasks by pet name and/or completion status."""
+        filtered = tasks
+        if pet_name is not None:
+            filtered = [t for t in filtered if t.pet_name == pet_name]
+        if completed is not None:
+            filtered = [t for t in filtered if t.completed == completed]
+        return filtered
 
     def build_daily_schedule(self, target_date: date) -> List[ScheduledTask]:
         tasks = self.owner.all_tasks_for_date(target_date)

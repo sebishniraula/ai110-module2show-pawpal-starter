@@ -4,13 +4,59 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+- Owner: manages pets and maps tasks to pets. Encapsulates owner preferences and the API that supports system operations.
+- Pet: stores pet data (name, species, age, medical notes) and holds task list. Has methods to add/remove tasks and query per-date tasks.
+- Task: data class representing a pet care event (feeding, walk, medication, appointment) with attributes like duration, priority, due date/time, recurrence, and completion state.
+- Scheduler: builds a daily timeline by collecting tasks for each pet and performing sorting/prioritization, conflict detection, and simple availability-based placement.
+
+Mermaid UML diagram:
+
+```mermaid
+classDiagram
+    class Owner {
+        +str name
+        +List~Pet~ pets
+        +Dict preferences
+        +add_pet(pet)
+        +add_task(task)
+        +all_tasks_for_date(date)
+    }
+    class Pet {
+        +str name
+        +str species
+        +List~Task~ tasks
+        +add_task(task)
+        +remove_task(title)
+        +tasks_for_date(date)
+    }
+    class Task {
+        +str title
+        +str pet_name
+        +str task_type
+        +int duration_minutes
+        +Priority priority
+        +date due_date
+        +time due_time
+        +str recurrence
+        +bool completed
+        +is_due_on(date)
+        +next_occurrence(date)
+    }
+    class Scheduler {
+        +Owner owner
+        +build_daily_schedule(date)
+        +detect_conflicts(schedule)
+        +summarize_schedule(schedule)
+    }
+
+    Owner "1" -- "*" Pet
+    Pet "1" -- "*" Task
+```
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+- Initially I planned only fixed and flexible tasks; I added recurrence and conflict detection after writing the first scheduler draft to align with assignment requirements.
+- Added `ScheduledTask` as a projection object in Scheduler so `Task` stays domain-focused and scheduler outputs are clearly timed objects.
 
 ---
 
@@ -25,6 +71,8 @@
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+I chose a lightweight conflict model that checks exact time overlaps in scheduled timeslots, rather than a full interval graph with partial overlap and flexible granular rescheduling. This keeps the system simple to reason about and perform in a small CLI app, while still catching the most common collision cases (same-hour tasks for the same or multiple pets).
 
 ---
 

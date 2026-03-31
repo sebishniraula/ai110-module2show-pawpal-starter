@@ -41,3 +41,21 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+## Completed Implementation
+
+- `pawpal_system.py` contains OOP model: `Owner`, `Pet`, `Task`, `ScheduledTask`, `Scheduler`.
+- Scheduler handles daily task collection, fixed vs flexible times, priority ordering, conflict detection, and simple recurrence rules.
+- `app.py` now calls `Scheduler` on button click, rendering task table and conflict warnings.
+- `test_pawpal_system.py` includes pytest coverage for task assignment, ordering, recurrence, and conflict detection.
+
+## Smarter Scheduling
+
+The latest version includes:
+
+- `Scheduler.sort_tasks_by_time` for chronological ordering with flexible tasks last
+- `Scheduler.filter_tasks` for pet and completion status filtering
+- `Task.mark_complete` auto-creates next recurrence for daily/weekly/monthly tasks
+- `Owner.mark_task_complete` as a UI-friendly helper to mark and reload repeating tasks
+- Enhanced conflict detection with `Scheduler.detect_conflicts` warning about overlapping times
+
