@@ -142,13 +142,59 @@ st.divider()
 st.subheader("Build Schedule")
 st.caption("This button calls your scheduling logic with the owner data in session state.")
 
-if st.button("Generate schedule"):
-    owner = st.session_state.owner
+# Show today's raw tasks and advanced controls
+owner = st.session_state.owner
+scheduler = Scheduler(owner=owner)
 
+today_tasks = owner.all_tasks_for_date(date.today())
+if today_tasks:
+    st.write("### Today's task list")
+    today_table = [
+        {
+            "pet": t.pet_name,
+            "task": t.title,
+            "type": t.task_type,
+            "due_time": t.due_time.strftime("%H:%M") if t.due_time else "Flexible",
+            "priority": t.priority.name,
+            "recurrence": t.recurrence or "none",
+            "completed": t.completed,
+        }
+        for t in today_tasks
+    ]
+    st.table(today_table)
+
+    st.write("### Sorting and filtering")
+    selected_pet = st.selectbox("Filter by pet", options=["all"] + [p.name for p in owner.pets], index=0)
+    show_completed = st.checkbox("Show completed tasks", value=True)
+    tasks_for_filter = today_tasks
+    if selected_pet != "all":
+        tasks_for_filter = scheduler.filter_tasks(tasks_for_filter, pet_name=selected_pet)
+    if not show_completed:
+        tasks_for_filter = scheduler.filter_tasks(tasks_for_filter, completed=False)
+
+    sorted_tasks = scheduler.sort_tasks_by_time(tasks_for_filter)
+    if sorted_tasks:
+        sorted_table = [
+            {
+                "pet": t.pet_name,
+                "task": t.title,
+                "due_time": t.due_time.strftime("%H:%M") if t.due_time else "Flexible",
+                "priority": t.priority.name,
+                "completed": t.completed,
+            }
+            for t in sorted_tasks
+        ]
+        st.success("Displaying sorted tasks")
+        st.table(sorted_table)
+    else:
+        st.info("No tasks match the selected filter criteria.")
+else:
+    st.info("No tasks for today. Add tasks to populate the schedule.")
+
+if st.button("Generate schedule"):
     if not owner.pets:
         st.warning("Add a pet and tasks first before generating schedule.")
     else:
-        scheduler = Scheduler(owner=owner)
         schedule = scheduler.build_daily_schedule(date.today())
 
         if schedule:
@@ -163,15 +209,18 @@ if st.button("Generate schedule"):
                 }
                 for s in schedule
             ]
+
             st.write("## Generated schedule")
             st.table(schedule_table)
 
             conflicts = scheduler.detect_conflicts(schedule)
             if conflicts:
-                st.error("Conflicts detected in schedule")
+                st.warning("⚠️ Conflicts detected in schedule")
                 for a, b in conflicts:
-                    st.write(f"{a.task.title} overlaps with {b.task.title}")
+                    st.write(f"- {a.task.title} ({a.task.pet_name}) overlaps with {b.task.title} ({b.task.pet_name})")
+                st.error("Please adjust task times or remove duplicates to resolve conflicts.")
             else:
-                st.success("No conflicts detected")
+                st.success("✅ No conflicts detected. Your schedule is clear.")
         else:
             st.info("No scheduled tasks for today")
+

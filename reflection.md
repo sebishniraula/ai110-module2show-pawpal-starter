@@ -80,13 +80,47 @@ I chose a lightweight conflict model that checks exact time overlaps in schedule
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+- Used Copilot to draft the class diagrams and initial `pawpal_system.py` skeleton, then iterated in agent mode for method definitions.
+- Used AI for algorithm ideas: task sorting by timezone, recurrence rules, conflict detection, plus test generation and fix guidance in pytest.
+- Helpful prompts included: "Suggest a schedule conflict detection implementation" and "How to map Owner->Pet->Task in a clean API".
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+- I rejected a Copilot suggestion that tried to optimize scheduling with a complicated graph search; I kept a simpler greedy-fixed/flexible approach for clarity and reliable behavior.
+- Verified by running `python -m pytest` and checking the schedule output in `main.py`/`app.py` against expected order and conflict states.
+
+---
+
+## 4. Testing and Verification
+
+**a. What you tested**
+
+- Verified sorting so tasks appear in chronological order by due time, with flexible tasks last.
+- Verified that completing a daily task via `Task.mark_complete` creates the next-day task automatically.
+- Verified conflict detection returns warnings when tasks have overlapping scheduled times.
+
+**b. Confidence**
+
+- 5/5: Base functionality is solid with current tests, but more edge cases could be added (monthly end-of-month behavior, multi-day scheduling, user persistence).
+
+---
+
+## 5. Reflection
+
+**a. What went well**
+
+- Structuring the backend as OOP classes made integration with Streamlit easy; separation of concerns kept app code simple.
+- Copilot helped accelerate the bulk of boilerplate and interface scaffolding while I focused on correctness.
+
+**b. What you would improve**
+
+- Add persistence (JSON or database) so session state isn't lost when Streamlit restarts.
+- Add a more robust conflict resolver that suggests alternative slots rather than only warning.
+
+**c. Key takeaway**
+
+- Being the lead architect means setting clear goals, reviewing AI outputs critically, and choosing maintainability over cleverness. AI accelerates implementation, but validation with tests and intentional design decisions still matters.
+
 
 ---
 

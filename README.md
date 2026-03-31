@@ -76,4 +76,10 @@ What the tests cover:
 
 Confidence Level: ⭐⭐⭐⭐⭐ (5/5) based on 7 passing tests and focused edge case coverage.
 
+## 📸 Demo
+
+<a href="/course_images/ai110/pawpal_screenshot.png" target="_blank"><img src='/course_images/ai110/pawpal_screenshot.png' title='PawPal App' alt='PawPal App' class='center-block' /></a>
+
+(Replace with your actual screenshot file path after capturing the Streamlit UI.)
+
 
